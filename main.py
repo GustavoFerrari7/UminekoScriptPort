@@ -4,7 +4,6 @@ from difflib import SequenceMatcher
 import time
 import fileinput
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     indexnum = 0
     def testefun(aqui):
@@ -13,43 +12,46 @@ if __name__ == '__main__':
         global mudado
         if "langen" in aqui:
             best = 0
+            maybe = 0
+            maybebest = ""
+            maybetranslation = ""
             wordbest = ""
             mudado = None
             cond = None
             mudado = aqui
             texto = re.findall("\^(.*?)\^", aqui)
             for i in range(len(texto)):
+                best = 0
+                passed = None
                 for j in range (num_lines):
                     s = SequenceMatcher(None, texto[i].replace('\n', ''), scriptlinesEN[j].replace('\n', ''))
                     #print(texto[i] + scriptlinesEN[j] + str(s.ratio()))
+                    if s.ratio() > maybe:
+                        maybe = s.ratio()
+                        maybebest = scriptlinesEN[j]
+                        maybetranslation = scriptlines[j]
                     if s.ratio() > 0.85 and s.ratio() > best:
                         best = s.ratio()
-                        #print(i)
-                        #print(j)
-                        #print(texto[i])
-                        #wordbest = texto[i]
-                        #print(scriptlinesEN[j])
                         mudado = mudado.replace(texto[i], scriptlines[j].replace('\n', ''))
-                        best = 0
                         cond = "aeooo"
+                        passed = "yes"
                         print(mudado)
-                #print(texto[i])
-                #print(wordbest)
-                #print(scriptlines[indexnum])
-                indexnum = indexnum + 1
+                if passed == None:
+                    print("Original: " + texto[i])
+                    print("Script EN: " + maybebest)
+                    print("Script PT: " + maybetranslation)
+                    manual = input("Frase: ")
+                    if manual == "y":
+                        mudado = mudado.replace(texto[i], maybetranslation.replace('\n', ''))
+                    else:
+                        mudado = mudado.replace(texto[i], manual.replace('\n', ''))
+                    cond = "aeooo"
             if cond != None:
-                #print(mudado)
                 g.write(mudado)
-                #pass
             else:
                 g.write(aqui)
-                #pass
         else:
             g.write(aqui)
-            #pass
-        #print(b)
-        #teste123 = aqui.replace(texto2, scriptlines[indexnum])
-        #print(teste123)
 
 
 
