@@ -22,8 +22,14 @@ if __name__ == '__main__':
             texto = re.findall("\^(.*?)\^", aqui)
             for i in range(len(texto)):
                 best = 0
+                global indexnum
+                maybe = 0
                 passed = None
-                for j in range (num_lines):
+                maybebest = ""
+                maybetranslation = ""
+                wordbest = ""
+                iterations = 0
+                for j in range (indexnum-5, num_lines):
                     s = SequenceMatcher(None, texto[i].replace('\n', ''), scriptlinesEN[j].replace('\n', ''))
                     #print(texto[i] + scriptlinesEN[j] + str(s.ratio()))
                     if s.ratio() > maybe:
@@ -36,6 +42,9 @@ if __name__ == '__main__':
                         cond = "aeooo"
                         passed = "yes"
                         print(mudado)
+                    if iterations > 50:
+                        break
+                    iterations +=1
                 if passed == None:
                     print("Original: " + texto[i])
                     print("Script EN: " + maybebest)
@@ -43,9 +52,12 @@ if __name__ == '__main__':
                     manual = input("Frase: ")
                     if manual == "y":
                         mudado = mudado.replace(texto[i], maybetranslation.replace('\n', ''))
+                    elif manual == "n":
+                        pass
                     else:
                         mudado = mudado.replace(texto[i], manual.replace('\n', ''))
                     cond = "aeooo"
+                indexnum+=1
             if cond != None:
                 g.write(mudado)
             else:
@@ -63,6 +75,5 @@ if __name__ == '__main__':
     scriptEN = open("scripten.txt", "r", encoding="utf-8")
     scriptlinesEN = scriptEN.readlines()
     num_lines = sum(1 for line in scriptlinesEN)
-
     for line in lines:
         testefun(line)
