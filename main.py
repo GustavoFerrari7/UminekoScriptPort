@@ -1,15 +1,33 @@
 
 import re
 from difflib import SequenceMatcher
+from functools import reduce
+import openai
+openai.api_key = ""
+
+def generate_text(prompt):
+    completions = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=60,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+
+    message = completions.choices[0].text
+    return message.strip()
 
 class bcolors:
     OKBLUE = '\033[94m'
     YELLOW = '\033[93m'
     RED = '\033[91m'
+    GREEN = '\033[92m'
     ENDC = '\033[0m'
 
 if __name__ == '__main__':
     indexnum = 0
+    repls = ('\n', ''), ('`', ''), ('{n}', '')
     def testefun(aqui):
         #print(aqui)
         global indexnum
@@ -42,7 +60,7 @@ if __name__ == '__main__':
                         maybetranslation = scriptlines[j]
                     if s.ratio() > 0.85 and s.ratio() > best:
                         best = s.ratio()
-                        mudado = mudado.replace(texto[i], scriptlines[j].replace('\n', ''))
+                        mudado = mudado.replace(texto[i], reduce(lambda a, kv: a.replace(*kv), repls, scriptlines[j]) )
                         cond = "aeooo"
                         passed = "yes"
                         print(mudado)
@@ -55,18 +73,22 @@ if __name__ == '__main__':
                     print("Script PT: " + maybetranslation + bcolors.ENDC)
                     print(bcolors.OKBLUE + "Script EN 2: " + scriptlinesEN[indexnum])
                     print("Script PT 2: " + scriptlines[indexnum] + bcolors.ENDC)
+                    opresponse = generate_text("traduza a seguinte frase para portugues:" + texto[i])
+                    print(bcolors.GREEN + "Script OpenAI:" + opresponse + bcolors.ENDC)
 
                     manual = input("Frase: ")
                     if manual == "y":
-                        mudado = mudado.replace(texto[i], maybetranslation.replace('\n', ''))
+                        mudado = mudado.replace(texto[i],  reduce(lambda a, kv: a.replace(*kv), repls,maybetranslation))
                     elif manual == "y2":
-                        mudado = mudado.replace(texto[i], scriptlines[indexnum].replace('\n', ''))
+                        mudado = mudado.replace(texto[i],  reduce(lambda a, kv: a.replace(*kv), repls, scriptlines[indexnum]))
+                    elif manual == "op":
+                        mudado = mudado.replace(texto[i],  reduce(lambda a, kv: a.replace(*kv), repls, opresponse))
                     elif manual == "n":
                         pass
                     elif manual == "n2":
                         indexnum -= 1
                     else:
-                        mudado = mudado.replace(texto[i], manual.replace('\n', ''))
+                            mudado = mudado.replace(texto[i], reduce(lambda a, kv: a.replace(*kv), repls, manual))
                     cond = "aeooo"
                 indexnum+=1
             if cond != None:
@@ -81,13 +103,14 @@ if __name__ == '__main__':
     f = open("original.u", "r", encoding="utf-8")
     lines = f.readlines()
     savedfile = None
-
+    savestateline = 0
     nf = input("Create a new file?  y = yes")
     if nf == "y":
         g = open("myfile.u", "w", encoding="utf-8")
     else:
         g = open("myfile.u", "r+", encoding="utf-8")
         savedfile = g.readlines()
+        savestateline = sum(1 for line in savedfile)
 
     script = open("script.txt", "r", encoding="utf-8")
     scriptlines = script.readlines()
@@ -96,9 +119,8 @@ if __name__ == '__main__':
 
 
     num_lines = sum(1 for line in scriptlinesEN)
-    savestateline = sum(1 for line in savedfile)
     print(savestateline)
-    savestateindex = 319
+    savestateindex = 3916
     indexnum = savestateindex
     countline = 0
     for line in lines:
@@ -106,3 +128,6 @@ if __name__ == '__main__':
             testefun(line)
         else:
             countline += 1
+
+
+ # 67
